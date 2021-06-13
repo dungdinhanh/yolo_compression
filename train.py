@@ -117,7 +117,7 @@ def train(hyp):
 
     ## debug
     f_json = open("test.json", "w")
-    json.dump(model.module_defs, f_json)
+    json.dump(model.module_defs, f_json, indent=4)
     f_json.close()
     #######
 
