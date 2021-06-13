@@ -116,8 +116,8 @@ def train(hyp):
         t_model = Darknet(t_cfg).to(device)
 
     ## debug
-    f_json = open("test.json", "w")
-    json.dump(model.module_defs, f_json, indent=4)
+    f_json = open("test.txt", "w")
+    f_json.write(str(model.module_defs))
     f_json.close()
     #######
 
