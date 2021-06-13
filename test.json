@@ -1,0 +1,129 @@
+[
+    {
+        "type": "convolutional",
+        "batch_normalize": 1,
+        "filters": 16,
+        "size": 3,
+        "stride": 1,
+        "pad": 1,
+        "activation": "leaky"
+    },
+    {
+        "type": "maxpool",
+        "size": 2,
+        "stride": 2
+    },
+    {
+        "type": "convolutional",
+        "batch_normalize": 1,
+        "filters": 32,
+        "size": 3,
+        "stride": 1,
+        "pad": 1,
+        "activation": "leaky"
+    },
+    {
+        "type": "maxpool",
+        "size": 2,
+        "stride": 2
+    },
+    {
+        "type": "convolutional",
+        "batch_normalize": 1,
+        "filters": 64,
+        "size": 3,
+        "stride": 1,
+        "pad": 1,
+        "activation": "leaky"
+    },
+    {
+        "type": "maxpool",
+        "size": 2,
+        "stride": 2
+    },
+    {
+        "type": "convolutional",
+        "batch_normalize": 1,
+        "filters": 128,
+        "size": 3,
+        "stride": 1,
+        "pad": 1,
+        "activation": "leaky"
+    },
+    {
+        "type": "maxpool",
+        "size": 2,
+        "stride": 2
+    },
+    {
+        "type": "convolutional",
+        "batch_normalize": 1,
+        "filters": 256,
+        "size": 3,
+        "stride": 1,
+        "pad": 1,
+        "activation": "leaky"
+    },
+    {
+        "type": "maxpool",
+        "size": 2,
+        "stride": 2
+    },
+    {
+        "type": "convolutional",
+        "batch_normalize": 1,
+        "filters": 512,
+        "size": 3,
+        "stride": 1,
+        "pad": 1,
+        "activation": "leaky"
+    },
+    {
+        "type": "maxpool",
+        "size": 2,
+        "stride": 1
+    },
+    {
+        "type": "convolutional",
+        "batch_normalize": 1,
+        "filters": 1024,
+        "size": 3,
+        "stride": 1,
+        "pad": 1,
+        "activation": "leaky"
+    },
+    {
+        "type": "convolutional",
+        "batch_normalize": 1,
+        "filters": 256,
+        "size": 1,
+        "stride": 1,
+        "pad": 1,
+        "activation": "leaky"
+    },
+    {
+        "type": "convolutional",
+        "batch_normalize": 1,
+        "filters": 512,
+        "size": 3,
+        "stride": 1,
+        "pad": 1,
+        "activation": "leaky"
+    },
+    {
+        "type": "convolutional",
+        "batch_normalize": 0,
+        "size": 1,
+        "stride": 1,
+        "pad": 1,
+        "filters": 255,
+        "activation": "linear"
+    },
+    {
+        "type": "yolo",
+        "mask": [
+            3,
+            4,
+            5
+        ],
+        "anchors": 
