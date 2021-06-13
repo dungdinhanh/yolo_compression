@@ -1,0 +1,6 @@
+data/datasets/
+*/__pycache__/
+__pycache__/
+.idea/
+runs/
+weights/

@@ -1,0 +1,6 @@
+download=bash data/scripts/get_voc.sh
+train=data/datasets/VOC/train.txt
+valid=data/datasets/VOC/val.txt
+names=data/voc.names
+classes=20
+
