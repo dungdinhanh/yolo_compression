@@ -15,6 +15,7 @@ from torch.cuda import amp
 from utils.torch_utils import ModelEMA, select_device  # DDP import
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
+import json
 
 wdir = 'weights' + os.sep  # weights dir
 last = wdir + 'last.pt'
@@ -113,6 +114,12 @@ def train(hyp):
                     FPGA=opt.FPGA, steps=steps, is_gray_scale=opt.gray_scale, maxabsscaler=opt.maxabsscaler).to(device)
     if t_cfg:
         t_model = Darknet(t_cfg).to(device)
+
+    ## debug
+    f_json = open("test.json", "w")
+    json.dump(model.module_defs, f_json)
+    f_json.close()
+    #######
 
     # print('<.....................using gridmask.......................>')
     # gridmask = GridMask(d1=96, d2=224, rotate=360, ratio=0.6, mode=1, prob=0.8)
