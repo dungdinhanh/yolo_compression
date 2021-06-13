@@ -1241,7 +1241,15 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
             for j, box in enumerate(boxes.T):
                 cls = int(classes[j])
                 color = color_lut[cls % len(color_lut)]
-                cls = names[cls] if names else cls
+                if names:
+                    if cls >= len(names) or cls < 0:
+                        cls = cls
+                        print("why number of class is %d (>= %d)"%(cls, len(names)))
+                    else:
+                        cls = len(names)
+                else:
+                    cls = cls
+                # cls = names[cls] if names else cls
                 if gt or conf[j] > 0.1:  # 0.3 conf thresh
                     label = '%s' % cls if gt else '%s %.1f' % (cls, conf[j])
                     plot_one_box(box, mosaic, label=label, color=color, line_thickness=tl)
