@@ -657,13 +657,13 @@ if __name__ == '__main__':
     wdir = os.path.join(results_folder, wdir)
     os.makedirs(wdir, exist_ok=True)
     tensorboard_folder= os.path.join(results_folder, "tb")
-
+    os.makedirs(tensorboard_folder, exist_ok=True)
 
 
     if not opt.evolve:  # Train normally
         if opt.local_rank in [-1, 0]:
             print('Start Tensorboard with "tensorboard --logdir=%s", view at http://localhost:6006/'%(tensorboard_folder))
-            tb_writer = SummaryWriter(comment=opt.name)
+            tb_writer = SummaryWriter(log_dir=tensorboard_folder, comment=opt.name)
         train(hyp)  # train normally
 
     else:  # Evolve hyperparameters (optional)
