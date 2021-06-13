@@ -20,6 +20,7 @@ wdir = 'weights' + os.sep  # weights dir
 last = wdir + 'last.pt'
 best = wdir + 'best.pt'
 results_file = 'results.txt'
+RESULTS="runs"
 
 # Hyperparameters
 hyp = {'giou': 3.54,  # giou loss gain
@@ -647,9 +648,21 @@ if __name__ == '__main__':
         device = torch_utils.select_device(opt.device, batch_size=opt.batch_size)
 
     tb_writer = None
+    results_folder = os.path.join(RESULTS, opt.name)
+
+
+    results_file = os.path.join(results_folder, results_file)
+    last = os.path.join(results_folder, last)
+    best = os.path.join(results_folder, best)
+    wdir = os.path.join(results_folder, wdir)
+    os.makedirs(wdir, exist_ok=True)
+    tensorboard_folder= os.path.join(results_folder, "tb")
+
+
+
     if not opt.evolve:  # Train normally
         if opt.local_rank in [-1, 0]:
-            print('Start Tensorboard with "tensorboard --logdir=runs", view at http://localhost:6006/')
+            print('Start Tensorboard with "tensorboard --logdir=%s", view at http://localhost:6006/'%(tensorboard_folder))
             tb_writer = SummaryWriter(comment=opt.name)
         train(hyp)  # train normally
 
