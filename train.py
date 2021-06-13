@@ -653,7 +653,7 @@ if __name__ == '__main__':
         base_name = os.path.basename(results_folder)
         count = int(base_name.split("_")[-1])
         count += 1
-        results_folder = os.path.join(results_folder, opt.name + "_%d"%(count))
+        results_folder = os.path.join(RESULTS, opt.name + "_%d"%(count))
 
 
     results_file = os.path.join(results_folder, results_file)
