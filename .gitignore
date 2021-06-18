@@ -5,3 +5,4 @@ __pycache__/
 runs/
 weights/
 train_sample/
+data/hand/
