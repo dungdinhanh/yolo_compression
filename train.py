@@ -11,6 +11,7 @@ from utils.utils import *
 from utils.prune_utils import *
 import math
 from torch.cuda import amp
+import yaml
 
 from utils.torch_utils import ModelEMA, select_device  # DDP import
 import torch.distributed as dist
@@ -23,36 +24,6 @@ best = wdir + 'best.pt'
 results_file = 'results.txt'
 RESULTS="runs"
 
-# Hyperparameters
-hyp = {'giou': 3.54,  # giou loss gain
-       'cls': 37.4,  # cls loss gain
-       'cls_pw': 1.0,  # cls BCELoss positive_weight
-       'obj': 64.3,  # obj loss gain (*=img_size/320 if img_size != 320)
-       'obj_pw': 1.0,  # obj BCELoss positive_weight
-       'iou_t': 0.20,  # iou training threshold
-       'lr0': 0.01,  # initial learning rate (SGD=5E-3, Adam=5E-4)
-       'lrf': 0.0005,  # final learning rate (with cos scheduler)
-       'momentum': 0.937,  # SGD momentum
-       'weight_decay': 0.0005,  # optimizer weight decay
-       'fl_gamma': 0.0,  # focal loss gamma (efficientDet default is gamma=1.5)
-       'hsv_h': 0.0138,  # image HSV-Hue augmentation (fraction)
-       'hsv_s': 0.678,  # image HSV-Saturation augmentation (fraction)
-       'hsv_v': 0.36,  # image HSV-Value augmentation (fraction)
-       'degrees': 1.98 * 0,  # image rotation (+/- deg)
-       'translate': 0.05 * 0,  # image translation (+/- fraction)
-       'scale': 0.05 * 0,  # image scale (+/- gain)
-       'shear': 0.641 * 0}  # image shear (+/- deg)
-
-# Overwrite hyp with hyp*.txt (optional)
-f = glob.glob('hyp*.txt')
-if f:
-    print('Using %s' % f[0])
-    for k, v in zip(hyp.keys(), np.loadtxt(f[0])):
-        hyp[k] = v
-
-# Print focal loss if gamma > 0
-if hyp['fl_gamma']:
-    print('Using FocalLoss(gamma=%g)' % hyp['fl_gamma'])
 
 
 def train(hyp):
@@ -671,12 +642,42 @@ if __name__ == '__main__':
     tensorboard_folder= os.path.join(results_folder, "tb")
     os.makedirs(tensorboard_folder, exist_ok=True)
 
+    # Hyperparameters
+    hyper = {'giou': 3.54,  # giou loss gain
+           'cls': 37.4,  # cls loss gain
+           'cls_pw': 1.0,  # cls BCELoss positive_weight
+           'obj': 64.3,  # obj loss gain (*=img_size/320 if img_size != 320)
+           'obj_pw': 1.0,  # obj BCELoss positive_weight
+           'iou_t': 0.20,  # iou training threshold
+           'lr0': 0.01,  # initial learning rate (SGD=5E-3, Adam=5E-4)
+           'lrf': 0.0005,  # final learning rate (with cos scheduler)
+           'momentum': 0.937,  # SGD momentum
+           'weight_decay': 0.0005,  # optimizer weight decay
+           'fl_gamma': 0.0,  # focal loss gamma (efficientDet default is gamma=1.5)
+           'hsv_h': 0.0138,  # image HSV-Hue augmentation (fraction)
+           'hsv_s': 0.678,  # image HSV-Saturation augmentation (fraction)
+           'hsv_v': 0.36,  # image HSV-Value augmentation (fraction)
+           'degrees': 1.98 * 0,  # image rotation (+/- deg)
+           'translate': 0.05 * 0,  # image translation (+/- fraction)
+           'scale': 0.05 * 0,  # image scale (+/- gain)
+           'shear': 0.641 * 0}  # image shear (+/- deg)
+
+    # Overwrite hyp with hyp*.txt (optional)
+    f = glob.glob('hyp*.txt')
+    if f:
+        print('Using %s' % f[0])
+        for k, v in zip(hyper.keys(), np.loadtxt(f[0])):
+            hyper[k] = v
+
+    # Print focal loss if gamma > 0
+    if hyper['fl_gamma']:
+        print('Using FocalLoss(gamma=%g)' % hyper['fl_gamma'])
 
     if not opt.evolve:  # Train normally
         if opt.local_rank in [-1, 0]:
             print('Start Tensorboard with "tensorboard --logdir=%s", view at http://localhost:6006/'%(tensorboard_folder))
             tb_writer = SummaryWriter(log_dir=tensorboard_folder, comment=opt.name)
-        train(hyp)  # train normally
+        train(hyper)  # train normally
 
     else:  # Evolve hyperparameters (optional)
         opt.notest, opt.nosave = True, True  # only test/save final epoch
@@ -712,20 +713,20 @@ if __name__ == '__main__':
                     while all(v == 1):  # mutate until a change occurs (prevent duplicates)
                         # v = (g * (npr.random(ng) < mp) * npr.randn(ng) * s + 1) ** 2.0
                         v = (g * (npr.random(ng) < mp) * npr.randn(ng) * npr.random() * s + 1).clip(0.3, 3.0)
-                for i, k in enumerate(hyp.keys()):  # plt.hist(v.ravel(), 300)
-                    hyp[k] = x[i + 7] * v[i]  # mutate
+                for i, k in enumerate(hyper.keys()):  # plt.hist(v.ravel(), 300)
+                    hyper[k] = x[i + 7] * v[i]  # mutate
 
             # Clip to limits
             keys = ['lr0', 'iou_t', 'momentum', 'weight_decay', 'hsv_s', 'hsv_v', 'translate', 'scale', 'fl_gamma']
             limits = [(1e-5, 1e-2), (0.00, 0.70), (0.60, 0.98), (0, 0.001), (0, .9), (0, .9), (0, .9), (0, .9), (0, 3)]
             for k, v in zip(keys, limits):
-                hyp[k] = np.clip(hyp[k], v[0], v[1])
+                hyper[k] = np.clip(hyper[k], v[0], v[1])
 
             # Train mutation
-            results = train(hyp.copy())
+            results = train(hyper.copy())
 
             # Write mutation results
-            print_mutation(hyp, results, opt.bucket)
+            print_mutation(hyper, results, opt.bucket)
 
             # Plot results
             # plot_evolution_results(hyp)
