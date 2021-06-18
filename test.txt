@@ -3,9 +3,9 @@
        [         37,          58],
        [         81,          82],
        [        135,         169],
-       [        344,         319]]), 'classes': 20, 'num': 6, 'jitter': '.3', 'ignore_thresh': '.7', 'truth_thresh': 1, 'random': 1}, {'type': 'route', 'layers': [-4]}, {'type': 'convolutional', 'batch_normalize': 1, 'filters': 128, 'size': 1, 'stride': 1, 'pad': 1, 'activation': 'leaky'}, {'type': 'upsample', 'stride': 2}, {'type': 'route', 'layers': [-1, 8]}, {'type': 'convolutional', 'batch_normalize': 1, 'filters': 256, 'size': 3, 'stride': 1, 'pad': 1, 'activation': 'leaky'}, {'type': 'convolutional', 'batch_normalize': 0, 'size': 1, 'stride': 1, 'pad': 1, 'filters': 255, 'activation': 'linear'}, {'type': 'yolo', 'mask': [0, 1, 2], 'anchors': array([[         10,          14],
+       [        344,         319]]), 'classes': 80, 'num': 6, 'jitter': '.3', 'ignore_thresh': '.7', 'truth_thresh': 1, 'random': 1}, {'type': 'route', 'layers': [-4]}, {'type': 'convolutional', 'batch_normalize': 1, 'filters': 128, 'size': 1, 'stride': 1, 'pad': 1, 'activation': 'leaky'}, {'type': 'upsample', 'stride': 2}, {'type': 'route', 'layers': [-1, 8]}, {'type': 'convolutional', 'batch_normalize': 1, 'filters': 256, 'size': 3, 'stride': 1, 'pad': 1, 'activation': 'leaky'}, {'type': 'convolutional', 'batch_normalize': 0, 'size': 1, 'stride': 1, 'pad': 1, 'filters': 255, 'activation': 'linear'}, {'type': 'yolo', 'mask': [0, 1, 2], 'anchors': array([[         10,          14],
        [         23,          27],
        [         37,          58],
        [         81,          82],
        [        135,         169],
-       [        344,         319]]), 'classes': 20, 'num': 6, 'jitter': '.3', 'ignore_thresh': '.7', 'truth_thresh': 1, 'random': 1}]
+       [        344,         319]]), 'classes': 80, 'num': 6, 'jitter': '.3', 'ignore_thresh': '.7', 'truth_thresh': 1, 'random': 1}]
