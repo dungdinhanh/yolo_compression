@@ -109,9 +109,10 @@ def train(hyp):
             t_model = Darknet(t_cfg).to(device)
 
     ## debug
-    f_json = open(module_file, "w")
-    f_json.write(str(model.module_defs))
-    f_json.close()
+    if not is_yaml(cfg):
+        f_json = open(module_file, "w")
+        f_json.write(str(model.module_defs))
+        f_json.close()
     #######
 
     # print('<.....................using gridmask.......................>')
