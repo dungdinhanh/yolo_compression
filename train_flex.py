@@ -210,8 +210,8 @@ def train(hyp):
         model = torch.nn.parallel.DistributedDataParallel(model)
 
     # why need this?????
-
-    model.yolo_layers = model.module.yolo_layers  # move yolo layer indices to top level
+    if darknet_format:
+        model.yolo_layers = model.module.yolo_layers  # move yolo layer indices to top level
 
     # Dataset
     dataset = LoadImagesAndLabels(train_path, img_size, batch_size,
