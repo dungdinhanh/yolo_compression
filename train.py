@@ -24,7 +24,8 @@ best = wdir + 'best.pt'
 results_file = 'results.txt'
 RESULTS="runs"
 
-
+import warnings
+warnings.filterwarnings("ignore")
 
 def train(hyp):
     cfg = opt.cfg
@@ -500,7 +501,7 @@ def train(hyp):
         # Write
         if opt.local_rank in [-1, 0]:
             with open(results_file, 'a') as f:
-                f.write(s + '%10.3g' * 7 % results + '\n')  # P, R, mAP, F1, test_losses=(GIoU, obj, cls)
+                f.write(s + '%10.3g' * 7 % results + '\n')  # P, R, mAP@0.5:0.95, mAP@0.5, test_losses=(GIoU, obj, cls)
             if len(opt.name) and opt.bucket:
                 os.system('gsutil cp results.txt gs://%s/results/results%s.txt' % (opt.bucket, opt.name))
 
