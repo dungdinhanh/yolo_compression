@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-cmd="pip install -r requirement.txt"
+cmd="pip install -r requirements.txt"
 echo ${cmd}
 eval ${cmd}
 
