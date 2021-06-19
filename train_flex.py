@@ -15,6 +15,7 @@ import yaml
 from models.yolo import Model
 from utils_cfg.torch_utils import ModelEMA, select_device  # DDP import
 from utils.general import is_yaml
+import utils.general
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 import json
@@ -98,6 +99,7 @@ def train(hyp):
     if is_yaml(cfg):
         model = Model(cfg, ch=3, nc=nc).to(device)  # create
         darknet_format = False
+        compute_loss = utils.general.compute_loss
     else:
         model = Darknet(cfg, quantized=opt.quantized, a_bit=opt.a_bit, w_bit=opt.w_bit,
                         FPGA=opt.FPGA, steps=steps, is_gray_scale=opt.gray_scale, maxabsscaler=opt.maxabsscaler,
