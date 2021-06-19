@@ -97,10 +97,12 @@ def train(hyp):
     # Update this with models from scale_yolov4
     if is_yaml(cfg):
         model = Model(cfg, ch=3, nc=nc).to(device)  # create
+        darknet_format = False
     else:
         model = Darknet(cfg, quantized=opt.quantized, a_bit=opt.a_bit, w_bit=opt.w_bit,
                         FPGA=opt.FPGA, steps=steps, is_gray_scale=opt.gray_scale, maxabsscaler=opt.maxabsscaler,
                         lossv=opt.lossv).to(device)
+        darknet_format = True
     if t_cfg:
         print("Loading teacher")
         if is_yaml(t_cfg):
@@ -208,7 +210,8 @@ def train(hyp):
         model = torch.nn.parallel.DistributedDataParallel(model)
 
     # why need this?????
-    # model.yolo_layers = model.module.yolo_layers  # move yolo layer indices to top level
+
+    model.yolo_layers = model.module.yolo_layers  # move yolo layer indices to top level
 
     # Dataset
     dataset = LoadImagesAndLabels(train_path, img_size, batch_size,
