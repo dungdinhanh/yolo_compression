@@ -27,21 +27,11 @@ def test(cfg,
          rank=-1,
          plot=True,
          is_gray_scale=False,
-         maxabsscaler=False):
+         maxabsscaler=False, lossv='v3'):
     # Initialize/load model and set device
     if model is None:
         device = torch_utils.select_device(opt.device, batch_size=batch_size)
         verbose = opt.task == 'test'
-
-        # loss setup
-        if opt.lossv == 'v3':
-            compute_loss = compute_loss_v3
-        elif opt.lossv == 'v4':
-            compute_loss = compute_loss_v4
-        elif opt.lossv == 'scalev4':
-            compute_loss = compute_loss_scalev4
-        else:
-            compute_loss = compute_loss_scalev4
 
         # Remove previous
         for f in glob.glob('test_batch*.jpg'):
@@ -89,17 +79,19 @@ def test(cfg,
                                 collate_fn=dataset.collate_fn)
 
     seen = 0
-    model.eval()
-
     # loss setup
-    if model.lossv == 'v3':
+    if lossv == 'v3':
         compute_loss = compute_loss_v3
-    elif model.lossv == 'v4':
+    elif lossv == 'v4':
         compute_loss = compute_loss_v4
-    elif model.lossv == 'scalev4':
+    elif lossv == 'scalev4':
         compute_loss = compute_loss_scalev4
     else:
         compute_loss = compute_loss_scalev4
+
+    model.eval()
+
+
     # _ = model(torch.zeros((1, 3, imgsz, imgsz), device=device)) if device.type != 'cpu' else None  # run once
     coco91class = coco80_to_coco91_class()
     s = ('%20s' + '%10s' * 6) % ('Class', 'Images', 'Targets', 'P', 'R', 'mAP@0.5', 'F1')
@@ -320,7 +312,7 @@ if __name__ == '__main__':
              FPGA=opt.FPGA,
              rank=-1,
              is_gray_scale=opt.gray_scale,
-             maxabsscaler=opt.maxabsscaler)
+             maxabsscaler=opt.maxabsscaler, lossv=opt.lossv)
 
     elif opt.task == 'benchmark':  # mAPs at 256-640 at conf 0.5 and 0.7
         y = []
