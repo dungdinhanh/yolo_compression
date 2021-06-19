@@ -672,7 +672,7 @@ class Darknet(nn.Module):
 
     def __init__(self, cfg, img_size=(416, 416), verbose=False, quantized=-1, a_bit=8, w_bit=8, FPGA=False,
                  quantizer_output=False, layer_idx=-1, reorder=False, TM=32, TN=32, steps=0, is_gray_scale=False,
-                 maxabsscaler=False):
+                 maxabsscaler=False, lossv='v3'):
         super(Darknet, self).__init__()
 
         if isinstance(cfg, str):
@@ -688,6 +688,7 @@ class Darknet(nn.Module):
         self.reorder = reorder
         self.TM = TM
         self.TN = TN
+        self.lossv = lossv
 
         self.hyperparams = copy.deepcopy(self.module_defs[0])
         self.module_list, self.routs = create_modules(self.module_defs, img_size, cfg, quantized=self.quantized,

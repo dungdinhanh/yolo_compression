@@ -33,6 +33,16 @@ def test(cfg,
         device = torch_utils.select_device(opt.device, batch_size=batch_size)
         verbose = opt.task == 'test'
 
+        # loss setup
+        if opt.lossv == 'v3':
+            compute_loss = compute_loss_v3
+        elif opt.lossv == 'v4':
+            compute_loss = compute_loss_v4
+        elif opt.lossv == 'scalev4':
+            compute_loss = compute_loss_scalev4
+        else:
+            compute_loss = compute_loss_scalev4
+
         # Remove previous
         for f in glob.glob('test_batch*.jpg'):
             os.remove(f)
@@ -80,6 +90,16 @@ def test(cfg,
 
     seen = 0
     model.eval()
+
+    # loss setup
+    if model.lossv == 'v3':
+        compute_loss = compute_loss_v3
+    elif model.lossv == 'v4':
+        compute_loss = compute_loss_v4
+    elif model.lossv == 'scalev4':
+        compute_loss = compute_loss_scalev4
+    else:
+        compute_loss = compute_loss_scalev4
     # _ = model(torch.zeros((1, 3, imgsz, imgsz), device=device)) if device.type != 'cpu' else None  # run once
     coco91class = coco80_to_coco91_class()
     s = ('%20s' + '%10s' * 6) % ('Class', 'Images', 'Targets', 'P', 'R', 'mAP@0.5', 'F1')
@@ -273,6 +293,7 @@ if __name__ == '__main__':
     parser.add_argument('--FPGA', action='store_true', help='FPGA')
     parser.add_argument('--gray-scale', action='store_true', help='gray scale trainning')
     parser.add_argument('--maxabsscaler', '-mas', action='store_true', help='Standarize input to (-1,1)')
+    parser.add_argument('--lossv', default='v3', choices=['v3', 'v4', 'scalev4'], help='compute loss')
 
     opt = parser.parse_args()
     opt.save_json = opt.save_json or any([x in opt.data for x in ['coco.data', 'coco2014.data', 'coco2017.data']])
