@@ -478,26 +478,26 @@ def train(hyp):
         scheduler.step()
 
         # Process epoch results
-        if opt.ema:
-            ema.update_attr(model)
-
-            if hasattr(model, 'module'):
-                module_defs, module_list = ema.eam.module.module_defs, ema.eam.module.module_list
-            else:
-                module_defs, module_list = ema.eam.module_defs, ema.eam.module_list
-
-            for i, (mdef, module) in enumerate(zip(module_defs, module_list)):
-                if mdef['type'] == 'yolo':
-                    yolo_layer = module
-                    yolo_layer.nx, yolo_layer.ny = 0, 0
-        if hasattr(model, 'module'):
-            module_defs, module_list = model.module.module_defs, model.module.module_list
-        else:
-            module_defs, module_list = model.module_defs, model.module_list
-        for i, (mdef, module) in enumerate(zip(module_defs, module_list)):
-            if mdef['type'] == 'yolo':
-                yolo_layer = module
-                yolo_layer.nx, yolo_layer.ny = 0, 0
+        # if opt.ema:
+        #     ema.update_attr(model)
+        #
+        #     if hasattr(model, 'module'):
+        #         module_defs, module_list = ema.eam.module.module_defs, ema.eam.module.module_list
+        #     else:
+        #         module_defs, module_list = ema.eam.module_defs, ema.eam.module_list
+        #
+        #     for i, (mdef, module) in enumerate(zip(module_defs, module_list)):
+        #         if mdef['type'] == 'yolo':
+        #             yolo_layer = module
+        #             yolo_layer.nx, yolo_layer.ny = 0, 0
+        # if hasattr(model, 'module'):
+        #     module_defs, module_list = model.module.module_defs, model.module.module_list
+        # else:
+        #     module_defs, module_list = model.module_defs, model.module_list
+        # for i, (mdef, module) in enumerate(zip(module_defs, module_list)):
+        #     if mdef['type'] == 'yolo':
+        #         yolo_layer = module
+        #         yolo_layer.nx, yolo_layer.ny = 0, 0
 
         final_epoch = epoch + 1 == epochs
         if not opt.notest or final_epoch:  # Calculate mAP
