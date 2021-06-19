@@ -641,6 +641,9 @@ if __name__ == '__main__':
     parser.add_argument('--FPGA', '-FPGA', dest='FPGA', action='store_true', help='FPGA')
     parser.add_argument('--gray-scale', action='store_true', help='gray scale trainning')
     parser.add_argument('--maxabsscaler', '-mas', action='store_true', help='Standarize input to (-1,1)')
+
+    parser.add_argument('--lossv', default='v3', choices=['v3', 'v4', 'scalev4'], help='compute loss')
+
     # DDP get local-rank
     parser.add_argument('--rank', default=0, help='rank of current process')
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
