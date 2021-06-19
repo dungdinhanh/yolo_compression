@@ -66,6 +66,7 @@ def test(cfg,
     else:  # called by train.py
         device = next(model.parameters()).device  # get model device
         verbose = False
+        save_txt = False
     # Configure run
     data = parse_data_cfg(data)
     nc = 1 if single_cls else int(data['classes'])  # number of classes
