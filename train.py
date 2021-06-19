@@ -695,6 +695,11 @@ if __name__ == '__main__':
              'scale': 0.898,  # image scale (+/- gain)
              'shear': 0.602}  # image shear (+/- deg)
 
+    print(opt)
+    opt.hyp = opt.hyp or ('data/hyp.finetune.yaml' if opt.weights else 'data/hyp.scratch.yaml')
+    opt.hyp = check_file(opt.hyp)
+    with open(opt.hyp) as f:
+        hyper = yaml.load(f, Loader=yaml.FullLoader)  # load hyps
     # Overwrite hyp with hyp*.txt (optional)
     f = glob.glob('hyp*.txt')
     if f:

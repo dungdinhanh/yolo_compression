@@ -1551,3 +1551,13 @@ def plot_results(start=0, stop=0, bucket='', id=()):  # from utils.utils import 
     fig.tight_layout()
     ax[1].legend()
     fig.savefig('results.png', dpi=200)
+
+
+def check_file(file):
+    # Searches for file if not found locally
+    if os.path.isfile(file) or file == '':
+        return file
+    else:
+        files = glob.glob('./**/' + file, recursive=True)  # find file
+        assert len(files), 'File Not Found: %s' % file  # assert file was found
+        return files[0]  # return first file if multiple found
