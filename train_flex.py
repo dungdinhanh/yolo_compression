@@ -106,7 +106,7 @@ def train(hyp):
     if t_cfg:
         print("Loading teacher")
         if is_yaml(t_cfg):
-            t_model = Model(t_cfg, ch=3, nc=nc)
+            t_model = Model(t_cfg, ch=3, nc=nc).to(device)
         else:
             t_model = Darknet(t_cfg).to(device)
 
