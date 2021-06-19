@@ -43,14 +43,17 @@ def train(hyp):
     imgsz_min, imgsz_max, imgsz_test = opt.img_size  # img sizes (min, max, test)
 
     # loss setup
-    if opt.lossv == 'v3':
-        compute_loss = compute_loss_v3
-    elif opt.lossv == 'v4':
-        compute_loss = compute_loss_v4
-    elif opt.lossv == 'scalev4':
-        compute_loss = compute_loss_scalev4
+    if is_yaml(cfg):
+        compute_loss = utils.general.compute_loss
     else:
-        compute_loss = compute_loss_scalev4
+        if opt.lossv == 'v3':
+            compute_loss = compute_loss_v3
+        elif opt.lossv == 'v4':
+            compute_loss = compute_loss_v4
+        elif opt.lossv == 'scalev4':
+            compute_loss = compute_loss_scalev4
+        else:
+            compute_loss = compute_loss_scalev4
 
     # Image Sizes
     gs = 32  # (pixels) grid size
@@ -99,7 +102,6 @@ def train(hyp):
     if is_yaml(cfg):
         model = Model(cfg, ch=3, nc=nc).to(device)  # create
         darknet_format = False
-        compute_loss = utils.general.compute_loss
     else:
         model = Darknet(cfg, quantized=opt.quantized, a_bit=opt.a_bit, w_bit=opt.w_bit,
                         FPGA=opt.FPGA, steps=steps, is_gray_scale=opt.gray_scale, maxabsscaler=opt.maxabsscaler,
