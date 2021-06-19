@@ -609,7 +609,7 @@ if __name__ == '__main__':
     parser.add_argument('--FPGA', '-FPGA', dest='FPGA', action='store_true', help='FPGA')
     parser.add_argument('--gray-scale', action='store_true', help='gray scale trainning')
     parser.add_argument('--maxabsscaler', '-mas', action='store_true', help='Standarize input to (-1,1)')
-
+    parser.add_argument('--hyp', type=str, default='', help='hyperparameters path, i.e. data/hyp.scratch.yaml')
     parser.add_argument('--lossv', default='v3', choices=['v3', 'v4', 'scalev4'], help='compute loss')
 
     # DDP get local-rank
