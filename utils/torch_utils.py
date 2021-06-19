@@ -42,6 +42,8 @@ def select_device(device='', batch_size=None):
     print('')  # skip a line
     return torch.device('cuda:0' if cuda else 'cpu')
 
+def is_parallel(model):
+    return type(model) in (nn.parallel.DataParallel, nn.parallel.DistributedDataParallel)
 
 def time_synchronized():
     torch.cuda.synchronize() if torch.cuda.is_available() else None
