@@ -23,6 +23,7 @@ last = wdir + 'last.pt'
 best = wdir + 'best.pt'
 results_file = 'results.txt'
 RESULTS="runs"
+module_file = "test.txt"
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -99,7 +100,7 @@ def train(hyp):
         t_model = Darknet(t_cfg).to(device)
 
     ## debug
-    f_json = open("test.txt", "w")
+    f_json = open(module_file, "w")
     f_json.write(str(model.module_defs))
     f_json.close()
     #######
@@ -656,6 +657,7 @@ if __name__ == '__main__':
     os.makedirs(wdir, exist_ok=True)
     tensorboard_folder= os.path.join(results_folder, "tb")
     os.makedirs(tensorboard_folder, exist_ok=True)
+    module_file= os.path.join(results_folder, module_file)
 
     # Hyperparameters
     # hyper = {'giou': 3.54,  # giou loss gain
@@ -701,12 +703,12 @@ if __name__ == '__main__':
     opt.hyp = check_file(opt.hyp)
     with open(opt.hyp) as f:
         hyper = yaml.load(f, Loader=yaml.FullLoader)  # load hyps
-    # Overwrite hyp with hyp*.txt (optional)
-    f = glob.glob('hyp*.txt')
-    if f:
-        print('Using %s' % f[0])
-        for k, v in zip(hyper.keys(), np.loadtxt(f[0])):
-            hyper[k] = v
+    # # Overwrite hyp with hyp*.txt (optional)
+    # f = glob.glob('hyp*.txt')
+    # if f:
+    #     print('Using %s' % f[0])
+    #     for k, v in zip(hyper.keys(), np.loadtxt(f[0])):
+    #         hyper[k] = v
 
     # Print focal loss if gamma > 0
     if hyper['fl_gamma']:
