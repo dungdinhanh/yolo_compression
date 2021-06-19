@@ -71,6 +71,16 @@ def train(hyp):
     t_weights = opt.t_weights  # teacher model weights
     imgsz_min, imgsz_max, imgsz_test = opt.img_size  # img sizes (min, max, test)
 
+    # loss setup
+    if opt.lossv == 'v3':
+        compute_loss = compute_loss_v3
+    elif opt.lossv == 'v4':
+        compute_loss = compute_loss_v4
+    elif opt.lossv == 'scalev4':
+        compute_loss = compute_loss_scalev4
+    else:
+        compute_loss = compute_loss_scalev4
+
     # Image Sizes
     gs = 32  # (pixels) grid size
     start_epoch = 0
