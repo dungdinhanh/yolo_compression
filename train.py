@@ -191,9 +191,11 @@ def train(hyp):
 
     # Initialize distributed training
     if opt.local_rank != -1:
-        model = DDP(model, device_ids=[opt.local_rank], output_device=opt.local_rank, find_unused_parameters=True)
+        # model = DDP(model, device_ids=[opt.local_rank], output_device=opt.local_rank, find_unused_parameters=True)
+        model = DDP(model, device_ids=[opt.local_rank], output_device=opt.local_rank)
     else:
-        model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True)
+        # model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True)
+        model = torch.nn.parallel.DistributedDataParallel(model)
 
     model.yolo_layers = model.module.yolo_layers  # move yolo layer indices to top level
 
