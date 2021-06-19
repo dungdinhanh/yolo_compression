@@ -103,7 +103,7 @@ def test(cfg,
 
     # _ = model(torch.zeros((1, 3, imgsz, imgsz), device=device)) if device.type != 'cpu' else None  # run once
     coco91class = coco80_to_coco91_class()
-    s = ('%20s' + '%10s' * 6) % ('Class', 'Images', 'Targets', 'P', 'R', 'mAP@0.5:95', 'mAP@0.5')
+    s = ('%20s' + '%10s' * 6) % ('Class', 'Images', 'Targets', 'P', 'R','mAP@.5', 'mAP@.5:95')
     p, r, f1, mp, mr, map, map50, t0, t1 = 0., 0., 0., 0., 0., 0., 0., 0., 0.
     pbar = tqdm(dataloader, desc=s) if rank in [-1, 0] else dataloader
     loss = torch.zeros(3, device=device)
