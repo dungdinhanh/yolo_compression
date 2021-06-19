@@ -351,6 +351,7 @@ class FocalLoss(nn.Module):
         alpha_factor = true * self.alpha + (1 - true) * (1 - self.alpha)
         modulating_factor = (1.0 - p_t) ** self.gamma
         loss *= alpha_factor * modulating_factor
+        # print(loss.mean.detach().cpu())
 
         if self.reduction == 'mean':
             return loss.mean()
@@ -410,6 +411,7 @@ def compute_loss(p, targets, model):  # predictions, targets, model
                 t = torch.full_like(ps[:, 5:], cn)  # targets
                 t[range(nb), tcls[i]] = cp
                 lcls += BCEcls(ps[:, 5:], t)  # BCE
+                # print(lcls)
                 # lcls += CE(ps[:, 5:], tcls[i])  # CE
 
             # Append targets to text file
