@@ -12,8 +12,9 @@ from utils_cfg.prune_utils import *
 import math
 from torch.cuda import amp
 import yaml
-
+from models.yolo import Model
 from utils_cfg.torch_utils import ModelEMA, select_device  # DDP import
+from utils.general import is_yaml
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 import json
@@ -93,11 +94,19 @@ def train(hyp):
 
     # Initialize model
     steps = math.ceil(len(open(train_path).readlines()) / batch_size) * epochs
-    model = Darknet(cfg, quantized=opt.quantized, a_bit=opt.a_bit, w_bit=opt.w_bit,
-                    FPGA=opt.FPGA, steps=steps, is_gray_scale=opt.gray_scale, maxabsscaler=opt.maxabsscaler,
-                    lossv=opt.lossv).to(device)
+    # Update this with models from scale_yolov4
+    if is_yaml(cfg):
+        model = Model(cfg, ch=3, nc=nc).to(device)  # create
+    else:
+        model = Darknet(cfg, quantized=opt.quantized, a_bit=opt.a_bit, w_bit=opt.w_bit,
+                        FPGA=opt.FPGA, steps=steps, is_gray_scale=opt.gray_scale, maxabsscaler=opt.maxabsscaler,
+                        lossv=opt.lossv).to(device)
     if t_cfg:
-        t_model = Darknet(t_cfg).to(device)
+        print("Loading teacher")
+        if is_yaml(t_cfg):
+            t_model = Model(t_cfg, ch=3, nc=nc)
+        else:
+            t_model = Darknet(t_cfg).to(device)
 
     ## debug
     f_json = open(module_file, "w")

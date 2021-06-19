@@ -2,8 +2,8 @@ import argparse
 import test
 from torch.utils.data import DataLoader
 from models import *
-from utils.datasets import *
-from utils.utils import *
+from utils_cfg.datasets import *
+from utils_cfg.utils import *
 
 wdir = 'weights' + os.sep  # weights dir
 PTQ_weights = wdir + 'PTQ.pt'

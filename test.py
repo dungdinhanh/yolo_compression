@@ -2,9 +2,9 @@ import argparse
 import json
 
 from torch.utils.data import DataLoader
-from models import *
-from utils.datasets import *
-from utils.utils import *
+from models_cfg import *
+from utils_cfg.datasets import *
+from utils_cfg.utils import *
 
 
 def test(cfg,

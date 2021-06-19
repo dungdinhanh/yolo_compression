@@ -1,7 +1,7 @@
 from models import *
-from utils.utils import *
-from utils.prune_utils import *
-from utils.datasets import *
+from utils_cfg.utils import *
+from utils_cfg.prune_utils import *
+from utils_cfg.datasets import *
 import os
 import test
 import argparse

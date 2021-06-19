@@ -1,11 +1,11 @@
 from models import *
-from utils.utils import *
+from utils_cfg.utils import *
 import numpy as np
 from copy import deepcopy
 from test import test
 from terminaltables import AsciiTable
 import time
-from utils.prune_utils import *
+from utils_cfg.prune_utils import *
 import argparse
 
 filter_switch = [each for each in range(2048) if (each % 32 == 0)]
