@@ -25,6 +25,27 @@ results_file = 'results.txt'
 RESULTS="runs"
 module_file = "test.txt"
 
+# Hyperparameters
+hyper = {
+       'giou': 3.54, # giou loss gain
+       'cls': 37.4,  # cls loss gain
+       'cls_pw': 1.0,  # cls BCELoss positive_weight
+       'obj': 64.3,  # obj loss gain (*=img_size/320 if img_size != 320)
+       'obj_pw': 1.0,  # obj BCELoss positive_weight
+       'iou_t': 0.20,  # iou training threshold
+       'lr0': 0.07,  # initial learning rate (SGD=5E-3, Adam=5E-4)
+       'lrf': 0.0005,  # final learning rate (with cos scheduler)
+       'momentum': 0.937,  # SGD momentum
+       'weight_decay': 0.0005,  # optimizer weight decay
+       'fl_gamma': 0.0,  # focal loss gamma (efficientDet default is gamma=1.5)
+       'hsv_h': 0.0138,  # image HSV-Hue augmentation (fraction)
+       'hsv_s': 0.678,  # image HSV-Saturation augmentation (fraction)
+       'hsv_v': 0.36,  # image HSV-Value augmentation (fraction)
+       'degrees': 1.98 * 0,  # image rotation (+/- deg)
+       'translate': 0.05 * 0,  # image translation (+/- fraction)
+       'scale': 0.05 * 0,  # image scale (+/- gain)
+       'shear': 0.641 * 0}  # image shear (+/- deg)
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -614,7 +635,7 @@ if __name__ == '__main__':
     parser.add_argument('--gray-scale', action='store_true', help='gray scale trainning')
     parser.add_argument('--maxabsscaler', '-mas', action='store_true', help='Standarize input to (-1,1)')
     parser.add_argument('--hyp', type=str, default='', help='hyperparameters path, i.e. data/hyp.scratch.yaml')
-    parser.add_argument('--lossv', default='v4', choices=['v3', 'v4', 'scalev4'], help='compute loss')
+    parser.add_argument('--lossv', default='v3', choices=['v3', 'v4', 'scalev4'], help='compute loss')
 
     # DDP get local-rank
     parser.add_argument('--rank', default=0, help='rank of current process')
@@ -661,50 +682,32 @@ if __name__ == '__main__':
     os.makedirs(tensorboard_folder, exist_ok=True)
     module_file= os.path.join(results_folder, module_file)
 
-    # Hyperparameters
-    # hyper = {'giou': 3.54,  # giou loss gain
-    #        'cls': 37.4,  # cls loss gain
-    #        'cls_pw': 1.0,  # cls BCELoss positive_weight
-    #        'obj': 64.3,  # obj loss gain (*=img_size/320 if img_size != 320)
-    #        'obj_pw': 1.0,  # obj BCELoss positive_weight
-    #        'iou_t': 0.20,  # iou training threshold
-    #        'lr0': 0.01,  # initial learning rate (SGD=5E-3, Adam=5E-4)
-    #        'lrf': 0.0005,  # final learning rate (with cos scheduler)
-    #        'momentum': 0.937,  # SGD momentum
-    #        'weight_decay': 0.0005,  # optimizer weight decay
-    #        'fl_gamma': 0.0,  # focal loss gamma (efficientDet default is gamma=1.5)
-    #        'hsv_h': 0.0138,  # image HSV-Hue augmentation (fraction)
-    #        'hsv_s': 0.678,  # image HSV-Saturation augmentation (fraction)
-    #        'hsv_v': 0.36,  # image HSV-Value augmentation (fraction)
-    #        'degrees': 1.98 * 0,  # image rotation (+/- deg)
-    #        'translate': 0.05 * 0,  # image translation (+/- fraction)
-    #        'scale': 0.05 * 0,  # image scale (+/- gain)
-    #        'shear': 0.641 * 0}  # image shear (+/- deg)
 
-    hyper = {'giou': 0.0296,  # giou loss gain
-             'cls': 0.243,  # cls loss gain
-             'cls_pw': 0.631,  # cls BCELoss positive_weight
-             'obj': 0.301,  # obj loss gain (*=img_size/320 if img_size != 320)
-             'obj_pw': 0.911,  # obj BCELoss positive_weight
-             'iou_t': 0.20,  # iou training threshold
-             'lr0': 0.0032,  # initial learning rate (SGD=5E-3, Adam=5E-4)
-             'lrf': 0.12,  # final learning rate (with cos scheduler)
-             'momentum': 0.843,  # SGD momentum
-             'weight_decay': 0.00036,  # optimizer weight decay
-             'fl_gamma': 0.0,  # focal loss gamma (efficientDet default is gamma=1.5)
-             'hsv_h': 0.0138,  # image HSV-Hue augmentation (fraction)
-             'hsv_s': 0.664,  # image HSV-Saturation augmentation (fraction)
-             'hsv_v': 0.464,  # image HSV-Value augmentation (fraction)
-             'degrees': 0.373,  # image rotation (+/- deg)
-             'translate': 0.245,  # image translation (+/- fraction)
-             'scale': 0.898,  # image scale (+/- gain)
-             'shear': 0.602}  # image shear (+/- deg)
+
+    # hyper = {'giou': 0.0296,  # giou loss gain
+    #          'cls': 0.243,  # cls loss gain
+    #          'cls_pw': 0.631,  # cls BCELoss positive_weight
+    #          'obj': 0.301,  # obj loss gain (*=img_size/320 if img_size != 320)
+    #          'obj_pw': 0.911,  # obj BCELoss positive_weight
+    #          'iou_t': 0.20,  # iou training threshold
+    #          'lr0': 0.0032,  # initial learning rate (SGD=5E-3, Adam=5E-4)
+    #          'lrf': 0.12,  # final learning rate (with cos scheduler)
+    #          'momentum': 0.843,  # SGD momentum
+    #          'weight_decay': 0.00036,  # optimizer weight decay
+    #          'fl_gamma': 0.0,  # focal loss gamma (efficientDet default is gamma=1.5)
+    #          'hsv_h': 0.0138,  # image HSV-Hue augmentation (fraction)
+    #          'hsv_s': 0.664,  # image HSV-Saturation augmentation (fraction)
+    #          'hsv_v': 0.464,  # image HSV-Value augmentation (fraction)
+    #          'degrees': 0.373,  # image rotation (+/- deg)
+    #          'translate': 0.245,  # image translation (+/- fraction)
+    #          'scale': 0.898,  # image scale (+/- gain)
+    #          'shear': 0.602}  # image shear (+/- deg)
 
     print(opt)
-    opt.hyp = opt.hyp or ('data/hyp.finetune.yaml' if opt.weights else 'data/hyp.scratch.yaml')
-    opt.hyp = check_file(opt.hyp)
-    with open(opt.hyp) as f:
-        hyper = yaml.load(f, Loader=yaml.FullLoader)  # load hyps
+    # opt.hyp = opt.hyp or ('data/hyp.finetune.yaml' if opt.weights else 'data/hyp.scratch.yaml')
+    # opt.hyp = check_file(opt.hyp)
+    # with open(opt.hyp) as f:
+    #     hyper = yaml.load(f, Loader=yaml.FullLoader)  # load hyps
     # # Overwrite hyp with hyp*.txt (optional)
     # f = glob.glob('hyp*.txt')
     # if f:
