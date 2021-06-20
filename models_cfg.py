@@ -1,11 +1,11 @@
-from utils.google_utils import *
-from utils.parse_config import *
-from utils.quantized.quantized_google import *
-from utils.quantized.quantized_dorefa import *
-from utils.quantized.quantized_ptq import *
-from utils.quantized.quantized_ptq_cos import *
-from utils.quantized.quantized_TPSQ import *
-from utils.layers import *
+from utils_cfg.google_utils import *
+from utils_cfg.parse_config import *
+from utils_cfg.quantized.quantized_google import *
+from utils_cfg.quantized.quantized_dorefa import *
+from utils_cfg.quantized.quantized_ptq import *
+from utils_cfg.quantized.quantized_ptq_cos import *
+from utils_cfg.quantized.quantized_TPSQ import *
+from utils_cfg.layers import *
 import copy
 
 ONNX_EXPORT = False

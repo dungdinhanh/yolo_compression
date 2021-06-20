@@ -2,9 +2,9 @@ import argparse
 import json
 
 from torch.utils.data import DataLoader
-from models import *
-from utils.datasets import *
-from utils.utils import *
+from models_cfg import *
+from utils_cfg.datasets import *
+from utils_cfg.utils import *
 
 
 def test(cfg,
@@ -54,17 +54,26 @@ def test(cfg,
 
         if device.type != 'cpu' and torch.cuda.device_count() > 1:
             model = nn.DataParallel(model)
+
+        # log
+        merge, save_txt = opt.merge, opt.save_txt
+        if save_txt:
+            out = Path('inference/output')
+            if os.path.exists(out):
+                shutil.rmtree(out)  # delete output folder
+            os.makedirs(out)  # make new output folder
         # summary(model, input_size=(3, imgsz, imgsz))
     else:  # called by train.py
         device = next(model.parameters()).device  # get model device
         verbose = False
+        save_txt = False
     # Configure run
     data = parse_data_cfg(data)
     nc = 1 if single_cls else int(data['classes'])  # number of classes
     path = data['valid']  # path to test images
     names = load_classes(data['names'])  # class names
     iouv = torch.linspace(0.5, 0.95, 10).to(device)  # iou vector for mAP@0.5:0.95
-    iouv = iouv[0].view(1)  # comment for mAP@0.5:0.95
+    # iouv = iouv[0].view(1)  # comment for mAP@0.5:0.95
     niou = iouv.numel()
 
     # Dataloader
@@ -94,8 +103,8 @@ def test(cfg,
 
     # _ = model(torch.zeros((1, 3, imgsz, imgsz), device=device)) if device.type != 'cpu' else None  # run once
     coco91class = coco80_to_coco91_class()
-    s = ('%20s' + '%10s' * 6) % ('Class', 'Images', 'Targets', 'P', 'R', 'mAP@0.5', 'F1')
-    p, r, f1, mp, mr, map, mf1, t0, t1 = 0., 0., 0., 0., 0., 0., 0., 0., 0.
+    s = ('%20s' + '%10s' * 6) % ('Class', 'Images', 'Targets', 'P', 'R','mAP@.5', 'mAP@.5:95')
+    p, r, f1, mp, mr, map, map50, t0, t1 = 0., 0., 0., 0., 0., 0., 0., 0., 0.
     pbar = tqdm(dataloader, desc=s) if rank in [-1, 0] else dataloader
     loss = torch.zeros(3, device=device)
     jdict, stats, ap, ap_class = [], [], [], []
@@ -119,7 +128,6 @@ def test(cfg,
         with torch.no_grad():
             # Run model
             t = torch_utils.time_synchronized()
-
             inf_out, train_out, _ = model(imgs, augment=augment)  # inference and training outputs
             t0 += torch_utils.time_synchronized() - t
 
@@ -144,10 +152,14 @@ def test(cfg,
                     stats.append((torch.zeros(0, niou, dtype=torch.bool), torch.Tensor(), torch.Tensor(), tcls))
                 continue
 
-            # Append to text file
-            # with open('test.txt', 'a') as file:
-            #    [file.write('%11.5g' * 7 % tuple(x) + '\n') for x in pred]
-
+            if save_txt:
+                gn = torch.tensor(shapes[si][0])[[1, 0, 1, 0]]  # normalization gain whwh
+                txt_path = str(out / Path(paths[si]).stem)
+                pred[:, :4] = scale_coords(imgs[si].shape[1:], pred[:, :4], shapes[si][0], shapes[si][1])  # to original
+                for *xyxy, conf, cls in pred:
+                    xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                    with open(txt_path + '.txt', 'a') as f:
+                        f.write(('%g ' * 5 + '\n') % (cls, *xywh))  # label format
             # Clip boxes to image bounds
             clip_coords(pred, (height, width))
 
@@ -185,9 +197,11 @@ def test(cfg,
                         ious, i = box_iou(pred[pi, :4], tbox[ti]).max(1)  # best ious, indices
 
                         # Append detections
+                        detected_set = set()
                         for j in (ious > iouv[0]).nonzero(as_tuple=False):
                             d = ti[i[j]]  # detected target
-                            if d not in detected:
+                            if d.item() not in detected_set:
+                                detected_set.add(d.item())
                                 detected.append(d)
                                 correct[pi[j]] = ious[j] > iouv  # iou_thres is 1xn
                                 if len(detected) == nl:  # all targets already located in image
@@ -208,9 +222,9 @@ def test(cfg,
     stats = [np.concatenate(x, 0) for x in zip(*stats)]  # to numpy
     if len(stats):
         p, r, ap, f1, ap_class = ap_per_class(*stats)
-        if niou > 1:
-            p, r, ap, f1 = p[:, 0], r[:, 0], ap.mean(1), ap[:, 0]  # [P, R, AP@0.5:0.95, AP@0.5]
-        mp, mr, map, mf1 = p.mean(), r.mean(), ap.mean(), f1.mean()
+        # if niou > 1:
+        p, r, ap50, ap = p[:, 0], r[:, 0], ap[:, 0], ap.mean(1)  # [P, R, AP@0.5, AP@0.5:0.95]
+        mp, mr, map50, map = p.mean(), r.mean(), ap50.mean(), ap.mean()
         nt = np.bincount(stats[3].astype(np.int64), minlength=nc)  # number of targets per class
     else:
         nt = torch.zeros(1)
@@ -218,12 +232,12 @@ def test(cfg,
     # Print results
     pf = '%20s' + '%10.3g' * 6  # print format
     if rank in [-1, 0]:
-        print(pf % ('all', seen, nt.sum(), mp, mr, map, mf1))
+        print(pf % ('all', seen, nt.sum(), mp, mr, map50, map))
 
     # Print results per class
     if verbose and nc > 1 and len(stats):
         for i, c in enumerate(ap_class):
-            print(pf % (names[c], seen, nt[c], p[i], r[i], ap[i], f1[i]))
+            print(pf % (names[c], seen, nt[c], p[i], r[i], ap50[i], ap[i]))
 
     # Print speeds
     if verbose or save_json:
@@ -253,7 +267,7 @@ def test(cfg,
             cocoEval.evaluate()
             cocoEval.accumulate()
             cocoEval.summarize()
-            # mf1, map = cocoEval.stats[:2]  # update to pycocotools results (mAP@0.5:0.95, mAP@0.5)
+            # map50, map = cocoEval.stats[:2]  # update to pycocotools results (mAP@0.5:0.95, mAP@0.5)
         except:
             print('WARNING: pycocotools must be installed with numpy==1.17 to run correctly. '
                   'See https://github.com/cocodataset/cocoapi/issues/356')
@@ -262,7 +276,7 @@ def test(cfg,
     maps = np.zeros(nc) + map
     for i, c in enumerate(ap_class):
         maps[c] = ap[i]
-    return (mp, mr, map, mf1, *(loss.cpu() / len(dataloader)).tolist()), maps
+    return (mp, mr, map, map50, *(loss.cpu() / len(dataloader)).tolist()), maps
 
 
 if __name__ == '__main__':
@@ -286,7 +300,8 @@ if __name__ == '__main__':
     parser.add_argument('--gray-scale', action='store_true', help='gray scale trainning')
     parser.add_argument('--maxabsscaler', '-mas', action='store_true', help='Standarize input to (-1,1)')
     parser.add_argument('--lossv', default='v3', choices=['v3', 'v4', 'scalev4'], help='compute loss')
-
+    parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
+    parser.add_argument('--merge', action='store_true', help='use Merge NMS')
     opt = parser.parse_args()
     opt.save_json = opt.save_json or any([x in opt.data for x in ['coco.data', 'coco2014.data', 'coco2017.data']])
     opt.cfg = list(glob.iglob('./**/' + opt.cfg, recursive=True))[0]  # find file

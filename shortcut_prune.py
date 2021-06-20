@@ -1,15 +1,15 @@
 import argparse
 
-from models import *
-from utils.utils import *
+from models_cfg import *
+from utils_cfg.utils import *
 import torch
 import numpy as np
 from copy import deepcopy
 from test import test
 from terminaltables import AsciiTable
 import time
-from utils.utils import *
-from utils.prune_utils import *
+from utils_cfg.utils import *
+from utils_cfg.prune_utils import *
 import os
 
 

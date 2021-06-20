@@ -1,9 +1,9 @@
 import argparse
 import struct
 
-from models import *  # set ONNX_EXPORT in models.py
+from models_cfg import *  # set ONNX_EXPORT in models_cfg.py
 
-from utils.utils import *
+from utils_cfg.utils import *
 
 
 def convert():

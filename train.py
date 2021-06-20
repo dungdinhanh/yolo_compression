@@ -5,15 +5,15 @@ import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 
 import test  # import test.py to get mAP after each epoch
-from models import *
-from utils.datasets import *
-from utils.utils import *
-from utils.prune_utils import *
+from models_cfg import *
+from utils_cfg.datasets import *
+from utils_cfg.utils import *
+from utils_cfg.prune_utils import *
 import math
 from torch.cuda import amp
 import yaml
 
-from utils.torch_utils import ModelEMA, select_device  # DDP import
+from utils_cfg.torch_utils import ModelEMA, select_device  # DDP import
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 import json
@@ -23,8 +23,10 @@ last = wdir + 'last.pt'
 best = wdir + 'best.pt'
 results_file = 'results.txt'
 RESULTS="runs"
+module_file = "test.txt"
 
-
+import warnings
+warnings.filterwarnings("ignore")
 
 def train(hyp):
     cfg = opt.cfg
@@ -98,7 +100,7 @@ def train(hyp):
         t_model = Darknet(t_cfg).to(device)
 
     ## debug
-    f_json = open("test.txt", "w")
+    f_json = open(module_file, "w")
     f_json.write(str(model.module_defs))
     f_json.close()
     #######
@@ -189,9 +191,11 @@ def train(hyp):
 
     # Initialize distributed training
     if opt.local_rank != -1:
-        model = DDP(model, device_ids=[opt.local_rank], output_device=opt.local_rank, find_unused_parameters=True)
+        # model = DDP(model, device_ids=[opt.local_rank], output_device=opt.local_rank, find_unused_parameters=True)
+        model = DDP(model, device_ids=[opt.local_rank], output_device=opt.local_rank)
     else:
-        model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True)
+        # model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True)
+        model = torch.nn.parallel.DistributedDataParallel(model)
 
     model.yolo_layers = model.module.yolo_layers  # move yolo layer indices to top level
 
@@ -500,7 +504,7 @@ def train(hyp):
         # Write
         if opt.local_rank in [-1, 0]:
             with open(results_file, 'a') as f:
-                f.write(s + '%10.3g' * 7 % results + '\n')  # P, R, mAP, F1, test_losses=(GIoU, obj, cls)
+                f.write(s + '%10.3g' * 7 % results + '\n')  # P, R, mAP@0.5:0.95, mAP@0.5, test_losses=(GIoU, obj, cls)
             if len(opt.name) and opt.bucket:
                 os.system('gsutil cp results.txt gs://%s/results/results%s.txt' % (opt.bucket, opt.name))
 
@@ -610,7 +614,7 @@ if __name__ == '__main__':
     parser.add_argument('--gray-scale', action='store_true', help='gray scale trainning')
     parser.add_argument('--maxabsscaler', '-mas', action='store_true', help='Standarize input to (-1,1)')
     parser.add_argument('--hyp', type=str, default='', help='hyperparameters path, i.e. data/hyp.scratch.yaml')
-    parser.add_argument('--lossv', default='v3', choices=['v3', 'v4', 'scalev4'], help='compute loss')
+    parser.add_argument('--lossv', default='v4', choices=['v3', 'v4', 'scalev4'], help='compute loss')
 
     # DDP get local-rank
     parser.add_argument('--rank', default=0, help='rank of current process')
@@ -655,6 +659,7 @@ if __name__ == '__main__':
     os.makedirs(wdir, exist_ok=True)
     tensorboard_folder= os.path.join(results_folder, "tb")
     os.makedirs(tensorboard_folder, exist_ok=True)
+    module_file= os.path.join(results_folder, module_file)
 
     # Hyperparameters
     hyper = {
@@ -702,12 +707,12 @@ if __name__ == '__main__':
     opt.hyp = check_file(opt.hyp)
     with open(opt.hyp) as f:
         hyper = yaml.load(f, Loader=yaml.FullLoader)  # load hyps
-    # Overwrite hyp with hyp*.txt (optional)
-    f = glob.glob('hyp*.txt')
-    if f:
-        print('Using %s' % f[0])
-        for k, v in zip(hyper.keys(), np.loadtxt(f[0])):
-            hyper[k] = v
+    # # Overwrite hyp with hyp*.txt (optional)
+    # f = glob.glob('hyp*.txt')
+    # if f:
+    #     print('Using %s' % f[0])
+    #     for k, v in zip(hyper.keys(), np.loadtxt(f[0])):
+    #         hyper[k] = v
 
     # Print focal loss if gamma > 0
     if hyper['fl_gamma']:
