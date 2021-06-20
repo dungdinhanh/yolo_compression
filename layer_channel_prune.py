@@ -1,4 +1,4 @@
-from models import *
+from models_cfg import *
 from utils_cfg.utils import *
 import numpy as np
 from copy import deepcopy

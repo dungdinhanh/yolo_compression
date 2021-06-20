@@ -1,4 +1,4 @@
-from models import *
+from models_cfg import *
 from utils_cfg.utils import *
 from utils_cfg.prune_utils import *
 from utils_cfg.datasets import *

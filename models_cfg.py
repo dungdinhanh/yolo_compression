@@ -1071,3 +1071,8 @@ def attempt_download(weights):
         if not (r == 0 and os.path.exists(weights) and os.path.getsize(weights) > 1E6):  # weights exist and > 1MB
             os.system('rm ' + weights)  # remove partial downloads
             raise Exception(msg)
+
+
+if __name__ == '__main__':
+    net= Darknet("cfg/yolov3/yolov3.cfg")
+    print(net)
