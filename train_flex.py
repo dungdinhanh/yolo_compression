@@ -4,7 +4,7 @@ import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 
-import test  # import test.py to get mAP after each epoch
+import test_flex  # import test.py to get mAP after each epoch
 from models_cfg import *
 from utils_cfg.datasets import *
 from utils_cfg.utils import *
